@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+	<meta charset="utf-8">
+	
+	<title>Garnberegner</title>
+	
+	<meta name="robots" content="All">
+	<meta name="author" content="Udgiver">
+	<meta name="copyright" content="Information om copyright">
+	
+	<link href="css/styles.css" rel="stylesheet" type="text/css">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<div class="container mt-5">
+	<h2 class="text-center">Garnberegner til Sweater</h2>
+	<div class="card p-4 shadow">
+		<form id="sweaterForm">
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label for="brystVidde" class="form-label">Brystmål (cm)</label>
+					<input type="number" id="brystVidde" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="sweaterLaengde" class="form-label">Sweaterlængde (cm)</label>
+					<input type="number" id="sweaterLaengde" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="aermeLaengde" class="form-label">Ærmelængde (cm)</label>
+					<input type="number" id="aermeLaengde" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="aermeBredde" class="form-label">Ærmebredde (øverst) (cm)</label>
+					<input type="number" id="aermeBredde" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="maskerPr10cm" class="form-label">Masker pr. 10 cm</label>
+					<input type="number" id="maskerPr10cm" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="raekkerPr10cm" class="form-label">Rækker pr. 10 cm</label>
+					<input type="number" id="raekkerPr10cm" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="meterPerNoegle" class="form-label">Meter garn pr. nøgle</label>
+					<input type="number" id="meterPerNoegle" class="form-control" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label for="pasForm" class="form-label">Pasform</label>
+					<select id="pasForm" class="form-select">
+						<option value="tæt">Tæt</option>
+						<option value="normal" selected>Normal</option>
+						<option value="løs">Løs</option>
+					</select>
+				</div>
+			</div>
+			<button type="submit" class="btn btn-primary w-100">Beregn garnforbrug</button>
+		</form>
+	</div>
+
+	<div class="mt-4 text-center">
+		<h4>Resultat:</h4>
+		<p id="resultat" class="fw-bold"></p>
+	</div>
+</div>
+
+
+<script>
+	document.getElementById("sweaterForm").addEventListener("submit", function (event) {
+		event.preventDefault();
+
+
+		//input felter
+		const brystVidde = parseFloat(document.getElementById('brystVidde').value);
+		const sweaterLaengde = parseFloat(document.getElementById('sweaterLaengde').value);
+		const aermeLaengde = parseFloat(document.getElementById('aermeLaengde').value);
+		const aermeBredde = parseFloat(document.getElementById('aermeBredde').value);
+		const maskerPr10cm = parseFloat(document.getElementById('maskerPr10cm').value);
+		const raekkerPr10cm = parseFloat(document.getElementById('raekkerPr10cm').value);
+		const meterPerNoegle = parseFloat(document.getElementById('meterPerNoegle').value);
+		const pasForm = document.getElementById('pasForm').value;
+
+
+
+		//validering
+		if ([brystVidde, sweaterLaengde, aermeLaengde, aermeBredde, maskerPr10cm, raekkerPr10cm, meterPerNoegle].some(isNaN) || meterPerNoegle <= 0) {
+			document.getElementById("resultat").innerText = "Ups, udfyld alle felter først.";
+			return;
+		}
+
+		//omregner strikkefasthed til pr. cm
+		const maskerPercm = maskerPr10cm / 10;
+		const raekkerPercm = raekkerPr10cm / 10;
+
+		//beregner arealer
+		const kropAreal = brystVidde * sweaterLaengde * 2; //front og bagpanel
+		const aermeAreal = aermeBredde * aermeLaengde * 2; //de to ærmer
+		const totalAreal = kropAreal + aermeAreal; //total areal for krop og ærmer
+
+		//beregner gauge
+		const totalMasker = totalAreal + maskerPercm + raekkerPercm;
+
+		//beregner garnforbrug
+		const basisMeter = (totalMasker / 100) * 1.1;
+
+		//medberegner pasformer
+		let pasFormFaktor = 1;
+		if (pasForm === "tæt") pasFormFaktor = 0.95;
+		else if (pasForm === "løs") pasFormFaktor = 1.15;
+
+		//beregner antal nøgler
+		const justeretMeter = basisMeter * pasFormFaktor;
+		const noegler = Math.ceil(justeretMeter / meterPerNoegle);
+
+
+		//viser resultat
+		document.getElementById("resultat").innerText = `du skal bruge ${noegler} nøgle(r) garn til projektet`;
+	});
+</script>
+
+<script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
